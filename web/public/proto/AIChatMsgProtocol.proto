@@ -1,0 +1,245 @@
+syntax = "proto3";
+
+package chat_msg;
+option java_package = "com.howcode.aichat.transport.protocol";
+option java_outer_classname = "AIChatMsgProtocol";
+
+// 消息指令：命名约定为 "消息类名去下划线转大写"，与 MessageRecognizer 的反射匹配规则一致。
+// 例如 UserLoginCmd 对应 USER_LOGIN_CMD。
+enum MsgCommand {
+  // 登录
+  USER_LOGIN_CMD = 0;
+  USER_LOGIN_ACK = 1;
+  // 心跳
+  HEART_BEAT_CMD = 2;
+  HEART_BEAT_ACK = 3;
+  // 加入房间
+  JOIN_ROOM_CMD = 4;
+  JOIN_ROOM_ACK = 5;
+  // 新建房间
+  CREATE_ROOM_CMD = 6;
+  CREATE_ROOM_ACK = 7;
+  // 离开房间
+  LEAVE_ROOM_CMD = 8;
+  LEAVE_ROOM_ACK = 9;
+  // 发送消息
+  SEND_MSG_CMD = 10;
+  SEND_MSG_ACK = 11;
+  // 消息广播
+  BROADCAST_MSG_ACK = 12;
+  // 异常消息
+  EXCEPTION_MSG = 13;
+  // 掉线消息
+  OFFLINE_MSG = 14;
+  // 退出登录
+  USER_LOGOUT_CMD = 17;
+  USER_LOGOUT_ACK = 18;
+  // 朋友离线通知
+  OFFLINE_NOTIFY = 19;
+  // 同步聊天室聊天记录
+  SYNC_CHAT_RECORD_CMD = 20;
+  SYNC_CHAT_RECORD_ACK = 21;
+  // 加入房间通知
+  JOIN_ROOM_NOTIFY = 24;
+  // 离开房间通知
+  LEAVE_ROOM_NOTIFY = 25;
+  // 同步房间成员列表
+  SYNC_ROOM_MEMBERS_CMD = 26;
+  SYNC_ROOM_MEMBERS_ACK = 27;
+  // 撤回消息
+  RECALL_MSG_CMD = 28;
+  RECALL_MSG_ACK = 29;
+  // 撤回消息通知
+  RECALL_MSG_NOTIFY = 30;
+  // AI 回复消息
+  AI_REPLY_MSG_ACK = 40;
+}
+
+// 用户登录
+message UserLoginCmd {
+  string userName = 1;
+  string userAvatar = 2;
+}
+message UserLoginAck {
+  string userId = 1;
+  string userName = 2;
+  string userAvatar = 3;
+}
+
+// 心跳
+message HeartBeatCmd {
+  string ping = 1;
+}
+message HeartBeatAck {
+  string pong = 1;
+}
+
+// 加入房间
+message JoinRoomCmd {
+  int32 roomNo = 1;
+}
+message JoinRoomAck {
+  string roomId = 1;
+  int32 roomNo = 2;
+  string roomName = 3;
+  int32 ai = 4;
+}
+
+// 新建房间
+message CreateRoomCmd {
+  int32 roomNo = 1;
+  string roomName = 2;
+  // 是否支持查看历史消息 0-不支持 1-支持
+  int32 history = 3;
+  // 是否开启AI助手 0-不开启 1-开启
+  int32 ai = 4;
+}
+message CreateRoomAck {
+  string roomId = 1;
+  int32 roomNo = 2;
+  string roomName = 3;
+  int32 ai = 4;
+}
+
+// 离开房间
+message LeaveRoomCmd {
+  string roomId = 1;
+}
+message LeaveRoomAck {
+  string roomId = 1;
+}
+
+// 消息类型
+enum MsgType {
+  TEXT = 0;
+  IMAGE = 1;
+  VOICE = 2;
+  VIDEO = 3;
+  FILE = 4;
+}
+
+// 发送消息
+message SendMsgCmd {
+  // 消息id，由客户端生成，用于幂等去重
+  string msgId = 1;
+  string roomId = 2;
+  MsgType msgType = 3;
+  string msg = 4;
+  string ext = 5;
+}
+message SendMsgAck {
+  string msgId = 1;
+  string userId = 2;
+  string roomId = 3;
+  bool status = 4;
+  string ext = 5;
+}
+
+// 消息广播
+message BroadcastMsgAck {
+  User user = 1;
+  string roomId = 2;
+  string msgId = 3;
+  MsgType msgType = 4;
+  string msg = 5;
+  string ext = 6;
+}
+
+// 用户信息
+message User {
+  string userId = 1;
+  string userName = 2;
+  string userAvatar = 3;
+}
+
+// 异常消息
+message ExceptionMsg {
+  int32 code = 1;
+  string msg = 2;
+}
+
+// 掉线消息
+message OfflineMsg {
+  User user = 1;
+  string roomId = 2;
+}
+
+// 退出登录
+message UserLogoutCmd {
+  string userId = 1;
+}
+message UserLogoutAck {
+  string userId = 1;
+}
+
+// 朋友离线通知
+message OfflineNotify {
+  User user = 1;
+  string roomId = 2;
+}
+
+// 同步聊天室聊天记录
+message SyncChatRecordCmd {
+  string roomId = 1;
+}
+message SyncChatRecordAck {
+  string roomId = 1;
+  repeated ChatRecord chatRecords = 2;
+}
+message ChatRecord {
+  string msgId = 1;
+  User user = 2;
+  string message = 3;
+  MsgType msgType = 4;
+  string ext = 5;
+  string createTime = 6;
+}
+
+// 加入房间通知
+message JoinRoomNotify {
+  User user = 1;
+  string roomId = 2;
+}
+// 离开房间通知
+message LeaveRoomNotify {
+  User user = 1;
+  string roomId = 2;
+}
+
+// 同步房间成员列表
+message SyncRoomMembersCmd {
+  string roomId = 1;
+}
+message SyncRoomMembersAck {
+  string roomId = 1;
+  repeated User members = 2;
+}
+
+// 撤回消息
+message RecallMsgCmd {
+  string roomId = 1;
+  string msgId = 2;
+}
+message RecallMsgAck {
+  string roomId = 1;
+  string msgId = 2;
+  string userId = 3;
+  bool status = 4;
+}
+message RecallMsgNotify {
+  string roomId = 1;
+  string msgId = 2;
+  string userId = 3;
+}
+
+// AI 回复消息
+message AiReplyMsgAck {
+  string roomId = 1;
+  User user = 2;
+  string msgId = 3;
+  string msg = 4;
+  string ext = 5;
+  MsgType msgType = 6;
+  // 1-成功 0-失败
+  int32 status = 7;
+}

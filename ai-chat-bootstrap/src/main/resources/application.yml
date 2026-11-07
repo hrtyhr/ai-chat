@@ -1,0 +1,44 @@
+aichat:
+  netty:
+    port: 9090
+    boss-threads: 1
+    worker-threads: 8
+    idle-minutes: 10
+  ai:
+    api-key:                       # 留空则使用本地 Mock
+    base-url: https://api.openai.com/v1
+    model: gpt-4o-mini
+    system-prompt: 你是一个友好、简洁的聊天助手。
+    timeout-seconds: 30
+  rocketmq:
+    enabled: true                  # 关闭后自动回退为本地广播/落库
+    name-server: 127.0.0.1:9876
+    producer-group: aichat_producer
+    broadcast-topic: aichat_broadcast
+    store-topic: aichat_store
+    broadcast-consumer-group: aichat_broadcast_consumer
+    store-consumer-group: aichat_store_consumer
+    send-timeout-ms: 3000
+
+spring:
+  application:
+    name: ai-chat
+  main:
+    banner-mode: off
+  datasource:
+    driver-class-name: com.mysql.cj.jdbc.Driver
+    url: jdbc:mysql://127.0.0.1:3306/ai_chat?useUnicode=true&characterEncoding=UTF-8&serverTimezone=Asia/Shanghai
+    username: ${MYSQL_USERNAME:root}
+    password: ${MYSQL_PASSWORD:123456}
+  data:
+    redis:
+      host: 127.0.0.1
+      port: 6379
+      database: 0
+      timeout: 5000
+
+mybatis-plus:
+  configuration:
+    map-underscore-to-camel-case: true
+  global-config:
+    banner: false
